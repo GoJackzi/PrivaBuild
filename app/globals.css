@@ -1,0 +1,142 @@
+@import "tw-animate-css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 0%;
+  --foreground: 48 100% 62%;
+  --card: 0 0% 6%;
+  --card-foreground: 48 100% 62%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 48 100% 62%;
+  --primary: 48 100% 62%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 48 100% 62%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 70%;
+  --accent: 48 100% 62%;
+  --accent-foreground: 0 0% 0%;
+  --destructive: 0 85% 58%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 22%;
+  --input: 0 0% 22%;
+  --ring: 48 100% 62%;
+  --chart-1: 48 100% 62%;
+  --chart-2: 210 100% 60%;
+  --chart-3: 270 100% 65%;
+  --chart-4: 330 100% 60%;
+  --chart-5: 160 100% 60%;
+  --radius: 0.5rem;
+  --sidebar: 0 0% 8%;
+  --sidebar-foreground: 48 100% 62%;
+  --sidebar-primary: 48 100% 62%;
+  --sidebar-primary-foreground: 0 0% 0%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 48 100% 62%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-ring: 48 100% 62%;
+}
+
+.dark {
+  --background: 0 0% 0%;
+  --foreground: 48 100% 62%;
+  --card: 0 0% 6%;
+  --card-foreground: 48 100% 62%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 48 100% 62%;
+  --primary: 48 100% 62%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 48 100% 62%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 70%;
+  --accent: 48 100% 62%;
+  --accent-foreground: 0 0% 0%;
+  --destructive: 0 85% 58%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 22%;
+  --input: 0 0% 22%;
+  --ring: 48 100% 62%;
+  --chart-1: 48 100% 62%;
+  --chart-2: 210 100% 60%;
+  --chart-3: 270 100% 65%;
+  --chart-4: 330 100% 60%;
+  --chart-5: 160 100% 60%;
+  --sidebar: 0 0% 8%;
+  --sidebar-foreground: 48 100% 62%;
+  --sidebar-primary: 48 100% 62%;
+  --sidebar-primary-foreground: 0 0% 0%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 48 100% 62%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-ring: 48 100% 62%;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+.glow-yellow {
+  box-shadow: 0 0 20px rgba(255, 214, 10, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-yellow:hover {
+  box-shadow: 0 0 30px rgba(255, 214, 10, 0.5);
+}
+
+.btn-3d {
+  position: relative;
+  transform: translateY(0);
+  transition: all 0.15s ease;
+  --btn-shadow-color: rgba(255, 214, 10, 0.4);
+  --btn-shadow-color-active: rgba(255, 214, 10, 0.3);
+  box-shadow: 0 4px 0 var(--btn-shadow-color), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--btn-shadow-color), 0 8px 25px rgba(0, 0, 0, 0.6);
+}
+
+.btn-3d:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--btn-shadow-color-active), 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+button[data-rk] {
+  font-family: inherit !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  background: black !important;
+  border: 2px solid #ffd60a !important;
+  color: #ffd60a !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 4px 0 rgba(255, 214, 10, 0.4), 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+}
+
+button[data-rk]:hover {
+  background: #ffd60a !important;
+  color: black !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(255, 214, 10, 0.4), 0 8px 25px rgba(0, 0, 0, 0.6) !important;
+}
+
+button[data-rk]:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(255, 214, 10, 0.3), 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+}
