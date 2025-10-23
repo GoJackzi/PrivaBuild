@@ -40,7 +40,9 @@ export function SubmissionsFeed() {
         const contract = getViemContract(publicClient)
 
         const latestBlock = await publicClient.getBlockNumber()
-        const fromBlock = latestBlock > 10000n ? latestBlock - 10000n : 0n
+        // Limit to last 100 blocks (~20 minutes on Sepolia) to respect Alchemy rate limits
+        // Will make 10 requests with 200ms delays = ~2 second load time
+        const fromBlock = latestBlock > 100n ? latestBlock - 100n : 0n
         const events = await contract.getSubmissionEvents(fromBlock, latestBlock)
 
         const fetchedSubmissions: Submission[] = await Promise.all(

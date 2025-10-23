@@ -63,15 +63,42 @@ export function getViemContract(publicClient: PublicClient) {
     },
 
     async getSubmissionEvents(fromBlock: bigint, toBlock: bigint) {
-      const logs = await publicClient.getContractEvents({
-        address,
-        abi: PRIVABUILD_ABI,
-        eventName: "SubmissionCreated",
-        fromBlock,
-        toBlock,
-      });
+      const CHUNK_SIZE = 10n; // Alchemy free tier block range limit
+      const DELAY_MS = 200; // Delay between requests to avoid rate limits
+      const allLogs: any[] = [];
 
-      return logs.map((log) => {
+      // Fetch events in chunks to respect Alchemy's free tier limits
+      let currentFrom = fromBlock;
+      
+      while (currentFrom <= toBlock) {
+        const currentTo = currentFrom + CHUNK_SIZE - 1n > toBlock 
+          ? toBlock 
+          : currentFrom + CHUNK_SIZE - 1n;
+
+        try {
+          const logs = await publicClient.getContractEvents({
+            address,
+            abi: PRIVABUILD_ABI,
+            eventName: "SubmissionCreated",
+            fromBlock: currentFrom,
+            toBlock: currentTo,
+          });
+
+          allLogs.push(...logs);
+          
+          // Add delay between requests to avoid rate limiting
+          if (currentTo < toBlock) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch events from block ${currentFrom} to ${currentTo}:`, error);
+          // Continue with next chunk even if one fails
+        }
+
+        currentFrom = currentTo + 1n;
+      }
+
+      return allLogs.map((log) => {
         const args = log.args as SubmissionCreatedEventArgs;
 
         return {
