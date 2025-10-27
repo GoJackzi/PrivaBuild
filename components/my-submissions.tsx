@@ -159,11 +159,11 @@ export function MySubmissions() {
         </div>
       )}
 
-      <div className="mt-6 rounded-lg border border-border bg-secondary/50 p-3">
-        <p className="text-xs text-muted-foreground text-center">
-          💡 Copy the Submission ID to use in "Manage Access Control"
-        </p>
-      </div>
+          <div className="mt-6 rounded-lg border border-border bg-secondary/50 p-3">
+            <p className="text-xs text-muted-foreground text-center">
+              💡 Copy the Submission ID to use in &ldquo;Manage Access Control&rdquo;
+            </p>
+          </div>
     </Card>
   )
 }

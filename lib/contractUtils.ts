@@ -65,6 +65,7 @@ export function getViemContract(publicClient: PublicClient) {
     async getSubmissionEvents(fromBlock: bigint, toBlock: bigint) {
       const CHUNK_SIZE = 10n; // Alchemy free tier block range limit
       const DELAY_MS = 200; // Delay between requests to avoid rate limits
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const allLogs: any[] = [];
 
       // Fetch events in chunks to respect Alchemy's free tier limits
