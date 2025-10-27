@@ -42,22 +42,27 @@ export function SubmissionForm() {
     setIsEncrypting(true)
     toast.info("🔐 Encrypting your submission...")
 
+    // Allow React to re-render the button before heavy work starts
+    await new Promise(resolve => setTimeout(resolve, 50))
+
     try {
       // Dynamically import browser-only modules
       const { encryptAndUpload } = await import("@/lib/ipfsStorage")
-      const { initFhevm, encryptHash } = await import("@/lib/fheUtils")
+      const { initFhevm, encryptHash, encryptValue } = await import("@/lib/fheUtils")
+      const { decodeBase64 } = await import("tweetnacl-util")
       
       // 1. Encrypt data and upload to IPFS
-      const { ipfsCID, dataHash, encryptionKey } = await encryptAndUpload(
+      const { ipfsCID, dataHash, encryptionKey, nonce } = await encryptAndUpload(
         { website, github, video },
         userAddress
       )
       
       console.log("✅ Encrypted & uploaded to IPFS:", ipfsCID)
-      console.log("🔑 Store this encryption key safely:", encryptionKey)
+      console.log("🔑 Encryption key (base64):", encryptionKey)
+      console.log("🔑 Nonce (base64):", nonce)
       toast.success("Data encrypted and uploaded to IPFS!")
 
-      // 2. Initialize fhEVM and encrypt the data hash
+      // 2. Initialize fhEVM and encrypt all values
       const ethereumProvider = (window as typeof window & { ethereum?: ethers.Eip1193Provider }).ethereum
 
       if (!ethereumProvider) {
@@ -67,18 +72,59 @@ export function SubmissionForm() {
       await initFhevm(ethereumProvider)
       
       const contractAddress = getContractAddress()
+      
+      // 2a. Encrypt the data hash
       const { handle: encryptedHashHandle, proof: hashProof } = await encryptHash(
         dataHash,
         contractAddress,
         userAddress
       )
       
+      // 2b. Convert encryption key from base64 to BigInt
+      const keyBytes = decodeBase64(encryptionKey)
+      const keyHex = '0x' + Array.from(keyBytes).map(b => b.toString(16).padStart(2, '0')).join('')
+      const keyBigInt = BigInt(keyHex)
+      
+      console.log("🔐 Encrypting symmetric key with FHE...")
+      const { handle: encryptedKeyHandle, proof: keyProof } = await encryptValue(
+        keyBigInt,
+        contractAddress,
+        userAddress
+      )
+      console.log("✅ Key encrypted:", { handle: encryptedKeyHandle, proofLength: keyProof.length })
+      
+      // 2c. Convert nonce from base64 to BigInt
+      const nonceBytes = decodeBase64(nonce)
+      const nonceHex = '0x' + Array.from(nonceBytes).map(b => b.toString(16).padStart(2, '0')).join('')
+      const nonceBigInt = BigInt(nonceHex)
+      
+      console.log("🔐 Encrypting nonce with FHE...")
+      const { handle: encryptedNonceHandle, proof: nonceProof } = await encryptValue(
+        nonceBigInt,
+        contractAddress,
+        userAddress
+      )
+      console.log("✅ Nonce encrypted:", { handle: encryptedNonceHandle, proofLength: nonceProof.length })
+      
       toast.info("📝 Submitting to blockchain...")
 
       // 3. Prepare reviewer address
       const reviewerAddress = reviewer || ethers.ZeroAddress
 
-      // 4. Call the smart contract
+      // 4. Call the smart contract with all encrypted values
+      console.log("📤 Submitting to contract with args:", {
+        builderName,
+        ipfsCID,
+        contractAddress,
+        reviewerAddress,
+        hashHandleLength: encryptedHashHandle.length,
+        hashProofLength: hashProof.length,
+        keyHandleLength: encryptedKeyHandle.length,
+        keyProofLength: keyProof.length,
+        nonceHandleLength: encryptedNonceHandle.length,
+        nonceProofLength: nonceProof.length,
+      })
+      
       writeContract({
         address: contractAddress as `0x${string}`,
         abi: PrivabuildArtifact.abi,
@@ -88,6 +134,10 @@ export function SubmissionForm() {
           ipfsCID,
           encryptedHashHandle,
           hashProof,
+          encryptedKeyHandle,
+          keyProof,
+          encryptedNonceHandle,
+          nonceProof,
           reviewerAddress,
         ],
       })

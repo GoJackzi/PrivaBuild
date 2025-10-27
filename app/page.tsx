@@ -3,6 +3,7 @@ import { Hero } from "@/components/hero"
 import { SubmissionForm } from "@/components/submission-form"
 import { SubmissionsFeed } from "@/components/submissions-feed"
 import { GrantAccess } from "@/components/grant-access"
+import { MySubmissions } from "@/components/my-submissions"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
@@ -19,8 +20,12 @@ export default function Home() {
           <SubmissionsFeed />
         </div>
 
+        {/* Side-by-side layout for Manage Access Control and My Submissions */}
         <div className="container mx-auto px-4 py-12">
-          <GrantAccess />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <GrantAccess />
+            <MySubmissions />
+          </div>
         </div>
       </main>
       <Footer />

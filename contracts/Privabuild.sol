@@ -2,16 +2,19 @@
 pragma solidity ^0.8.24;
 
 import "@fhevm/solidity/lib/FHE.sol";
+import "@fhevm/solidity/config/ZamaConfig.sol";
 
 /// @title Privabuild - Private Onchain Collaboration Hub
 /// @notice Encrypted submission system using Zama fhEVM + IPFS storage
 /// @dev Built for Zama Builder Program - demonstrates fhEVM ACL with off-chain encrypted storage
-contract Privabuild {
+contract Privabuild is SepoliaConfig {
     struct Submission {
         address builder;
         string builderName;
         string ipfsCID;           // Public IPFS pointer to encrypted data
         euint256 dataHash;        // Encrypted verification hash (fhEVM)
+        euint256 encryptionKey;   // Encrypted symmetric key for IPFS data decryption
+        euint256 encryptionNonce; // Encrypted nonce for IPFS data decryption
         uint256 timestamp;
     }
 
@@ -40,13 +43,21 @@ contract Privabuild {
     /// @param builderName Public name of the builder
     /// @param ipfsCID IPFS content identifier for encrypted data
     /// @param encryptedHash Encrypted hash for verification (euint256)
-    /// @param attestation Gateway attestation for the encrypted hash
+    /// @param hashAttestation Gateway attestation for the encrypted hash
+    /// @param encryptedKey Encrypted symmetric key for IPFS decryption
+    /// @param keyAttestation Gateway attestation for the encrypted key
+    /// @param encryptedNonce Encrypted nonce for IPFS decryption
+    /// @param nonceAttestation Gateway attestation for the encrypted nonce
     /// @param optionalReviewer Address of reviewer (0x0 for default)
     function submit(
         string memory builderName,
         string memory ipfsCID,
         externalEuint256 encryptedHash,
-        bytes calldata attestation,
+        bytes calldata hashAttestation,
+        externalEuint256 encryptedKey,
+        bytes calldata keyAttestation,
+        externalEuint256 encryptedNonce,
+        bytes calldata nonceAttestation,
         address optionalReviewer
     ) external {
         bytes32 id = keccak256(abi.encode(msg.sender, block.timestamp));
@@ -55,15 +66,26 @@ contract Privabuild {
         s.builder = msg.sender;
         s.builderName = builderName;
         s.ipfsCID = ipfsCID;
-        s.dataHash = FHE.fromExternal(encryptedHash, attestation);
+        s.dataHash = FHE.fromExternal(encryptedHash, hashAttestation);
+        s.encryptionKey = FHE.fromExternal(encryptedKey, keyAttestation);
+        s.encryptionNonce = FHE.fromExternal(encryptedNonce, nonceAttestation);
         s.timestamp = block.timestamp;
 
+        // Grant ACL permissions to contract (required for user decryption)
+        FHE.allowThis(s.dataHash);
+        FHE.allowThis(s.encryptionKey);
+        FHE.allowThis(s.encryptionNonce);
+        
         // Grant ACL permissions to builder
         FHE.allow(s.dataHash, msg.sender);
+        FHE.allow(s.encryptionKey, msg.sender);
+        FHE.allow(s.encryptionNonce, msg.sender);
         
         // Grant ACL to reviewer
         address reviewer = optionalReviewer == address(0) ? DEFAULT_REVIEWER : optionalReviewer;
         FHE.allow(s.dataHash, reviewer);
+        FHE.allow(s.encryptionKey, reviewer);
+        FHE.allow(s.encryptionNonce, reviewer);
         reviewers[id].push(msg.sender);
         reviewers[id].push(reviewer);
         
@@ -80,6 +102,8 @@ contract Privabuild {
         
         Submission storage s = submissions[id];
         FHE.allow(s.dataHash, reviewer);
+        FHE.allow(s.encryptionKey, reviewer);
+        FHE.allow(s.encryptionNonce, reviewer);
         reviewers[id].push(reviewer);
         
         emit AccessGranted(id, reviewer);
@@ -131,6 +155,26 @@ contract Privabuild {
     /// @return Total count
     function getSubmissionCount() external view returns (uint256) {
         return submissionIds.length;
+    }
+
+    /// @notice Get encrypted key handle for user decryption (client-side)
+    /// @dev Returns the euint256 handle - decryption happens client-side via Zama SDK
+    /// @param id Submission ID
+    /// @return Encrypted key handle
+    function getEncryptedKey(bytes32 id) external view returns (euint256) {
+        Submission storage s = submissions[id];
+        require(s.builder != address(0), "Submission does not exist");
+        return s.encryptionKey;
+    }
+
+    /// @notice Get encrypted nonce handle for user decryption (client-side)
+    /// @dev Returns the euint256 handle - decryption happens client-side via Zama SDK
+    /// @param id Submission ID
+    /// @return Encrypted nonce handle
+    function getEncryptedNonce(bytes32 id) external view returns (euint256) {
+        Submission storage s = submissions[id];
+        require(s.builder != address(0), "Submission does not exist");
+        return s.encryptionNonce;
     }
 }
 

@@ -39,6 +39,12 @@ export function GrantAccess() {
       return
     }
 
+    // Validate submission ID format (must be bytes32 hex string)
+    if (!submissionId.startsWith("0x") || submissionId.length !== 66) {
+      toast.error("Invalid submission ID format (must be 0x... with 64 hex characters)")
+      return
+    }
+
     setAction(actionType)
 
     try {
@@ -51,7 +57,7 @@ export function GrantAccess() {
         address: contractAddress as `0x${string}`,
         abi: PrivabuildArtifact.abi,
         functionName,
-        args: [BigInt(submissionId), reviewerAddress],
+        args: [submissionId as `0x${string}`, reviewerAddress as `0x${string}`],
       })
     } catch (error) {
       console.error("ACL operation failed:", error)
@@ -71,9 +77,11 @@ export function GrantAccess() {
   const isLoading = isPending || isConfirming
 
   return (
-    <section className="container mx-auto px-4 py-16">
-      <Card className="mx-auto max-w-2xl border-border bg-card p-8">
-        <h2 className="mb-6 text-3xl font-bold text-[#ffd60a] text-center">Manage Access Control</h2>
+    <Card className="border-border bg-card p-8 h-full">
+      <h2 className="mb-4 text-2xl font-bold text-[#ffd60a] text-center">Manage Access Control</h2>
+      <p className="mb-6 text-center text-sm text-muted-foreground">
+        Grant access to additional reviewers for your submissions
+      </p>
 
         <form className="mb-8 space-y-4">
           <div className="space-y-2">
@@ -82,8 +90,8 @@ export function GrantAccess() {
             </Label>
             <Input
               id="submission-id"
-              placeholder="e.g. 1"
-              className="border-border bg-secondary text-foreground"
+              placeholder="0x... (copy from My Submissions)"
+              className="border-border bg-secondary text-foreground font-mono text-xs"
               value={submissionId}
               onChange={(e) => setSubmissionId(e.target.value)}
               disabled={isLoading}
@@ -157,13 +165,12 @@ export function GrantAccess() {
         <div className="rounded-lg border border-border bg-secondary/50 p-4">
           <h3 className="mb-2 text-sm font-semibold text-foreground">💡 How it Works</h3>
           <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>• Only the submission owner can grant/revoke access</li>
-            <li>• Authorized reviewers can decrypt submission data client-side</li>
-            <li>• All changes are recorded on-chain via ACL events</li>
-            <li>• Default reviewer is set during submission (or burn address if empty)</li>
+            <li>• Use this if a reviewer requests access to your submission</li>
+            <li>• Only you (the submission owner) can grant/revoke access</li>
+            <li>• Authorized reviewers can then decrypt your submission</li>
+            <li>• All changes are recorded on-chain</li>
           </ul>
         </div>
       </Card>
-    </section>
   )
 }
