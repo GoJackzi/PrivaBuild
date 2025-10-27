@@ -11,7 +11,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagm
 import { toast } from "sonner"
 import { getContractAddress } from "@/lib/contractUtils"
 import { ethers } from "ethers"
-import PrivabuildArtifact from "@/artifacts/contracts/Privabuild.sol/Privabuild.json"
+import PrivabuildABI from "@/lib/PrivabuildABI.json"
 
 export function SubmissionForm() {
   const [builderName, setBuilderName] = useState("")
@@ -125,10 +125,10 @@ export function SubmissionForm() {
         nonceProofLength: nonceProof.length,
       })
       
-      writeContract({
-        address: contractAddress as `0x${string}`,
-        abi: PrivabuildArtifact.abi,
-        functionName: "submit",
+          writeContract({
+            address: contractAddress as `0x${string}`,
+            abi: PrivabuildABI.abi,
+            functionName: "submit",
         args: [
           builderName,
           ipfsCID,

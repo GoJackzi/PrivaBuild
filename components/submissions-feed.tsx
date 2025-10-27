@@ -8,7 +8,7 @@ import { formatDistanceToNow } from "date-fns"
 import { getViemContract, getContractAddress, PRIVABUILD_ABI } from "@/lib/contractUtils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import PrivabuildArtifact from "@/artifacts/contracts/Privabuild.sol/Privabuild.json"
+import PrivabuildABI from "@/lib/PrivabuildABI.json"
 import { ethers } from "ethers"
 
 interface Submission {
@@ -159,19 +159,19 @@ export function SubmissionsFeed() {
 
       // Get encrypted key and nonce handles from contract
       console.log("🔐 Fetching encrypted key and nonce...")
-      const encryptedKeyHandle = await publicClient.readContract({
-        address: contractAddress as `0x${string}`,
-        abi: PrivabuildArtifact.abi,
-        functionName: "getEncryptedKey",
-        args: [submission.id as `0x${string}`],
-      })
+          const encryptedKeyHandle = await publicClient.readContract({
+            address: contractAddress as `0x${string}`,
+            abi: PrivabuildABI.abi,
+            functionName: "getEncryptedKey",
+            args: [submission.id as `0x${string}`],
+          })
 
-      const encryptedNonceHandle = await publicClient.readContract({
-        address: contractAddress as `0x${string}`,
-        abi: PrivabuildArtifact.abi,
-        functionName: "getEncryptedNonce",
-        args: [submission.id as `0x${string}`],
-      })
+          const encryptedNonceHandle = await publicClient.readContract({
+            address: contractAddress as `0x${string}`,
+            abi: PrivabuildABI.abi,
+            functionName: "getEncryptedNonce",
+            args: [submission.id as `0x${string}`],
+          })
 
       console.log("✅ Encrypted handles retrieved")
 

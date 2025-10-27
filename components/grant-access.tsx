@@ -9,7 +9,7 @@ import React, { useState } from "react"
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi"
 import { toast } from "sonner"
 import { getContractAddress } from "@/lib/contractUtils"
-import PrivabuildArtifact from "@/artifacts/contracts/Privabuild.sol/Privabuild.json"
+import PrivabuildABI from "@/lib/PrivabuildABI.json"
 import { ethers } from "ethers"
 
 export function GrantAccess() {
@@ -53,12 +53,12 @@ export function GrantAccess() {
 
       toast.info(`${actionType === "grant" ? "Granting" : "Revoking"} access...`)
 
-      writeContract({
-        address: contractAddress as `0x${string}`,
-        abi: PrivabuildArtifact.abi,
-        functionName,
-        args: [submissionId as `0x${string}`, reviewerAddress as `0x${string}`],
-      })
+          writeContract({
+            address: contractAddress as `0x${string}`,
+            abi: PrivabuildABI.abi,
+            functionName,
+            args: [submissionId as `0x${string}`, reviewerAddress as `0x${string}`],
+          })
     } catch (error) {
       console.error("ACL operation failed:", error)
       const message = error instanceof Error ? error.message : "Unknown error"

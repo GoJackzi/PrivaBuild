@@ -1,15 +1,15 @@
 import { ethers } from "ethers";
 import type { Abi, PublicClient } from "viem";
 import contractConfig from "./contract-config.json";
-import PrivabuildArtifact from "@/artifacts/contracts/Privabuild.sol/Privabuild.json";
+import PrivabuildABI from "./PrivabuildABI.json";
 
 /**
  * Contract utilities for interacting with Privabuild smart contract
  */
 
 // Privabuild contract ABI (imported from artifacts to stay in sync with Solidity)
-export const PRIVABUILD_ABI = PrivabuildArtifact.abi as Abi;
-const PRIVABUILD_ETHERS_ABI = PrivabuildArtifact.abi as ethers.InterfaceAbi;
+export const PRIVABUILD_ABI = PrivabuildABI.abi as Abi;
+const PRIVABUILD_ETHERS_ABI = PrivabuildABI.abi as ethers.InterfaceAbi;
 
 type SubmissionCreatedEventArgs = {
   id: `0x${string}`;
